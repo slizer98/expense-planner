@@ -5,6 +5,7 @@ import 'react-calendar/dist/Calendar.css'
 import 'react-date-picker/dist/DatePicker.css'
 import { DraftExpense, Value } from "../types";
 import ErrorMessage from "./ErrorMessage";
+import { useBudget } from "../hooks/useBudget";
 
 export default function ExpenseForm() {
 
@@ -16,6 +17,7 @@ export default function ExpenseForm() {
   })
 
   const [error, setError] = useState('')
+  const { dispatch } = useBudget()
 
   const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
     const {name, value} = e.target
@@ -40,7 +42,7 @@ export default function ExpenseForm() {
       }, 3000);
       return
     }
-    console.log('Ok')
+    dispatch({type: 'add-expense', payload: { expense }})
   }
   
   return (
