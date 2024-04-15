@@ -58,7 +58,8 @@ export const budgerReducer = (
 
     return {
       ...state,
-      expenses: [...state.expenses, expense ]
+      expenses: [...state.expenses, expense ],
+      modal: false
     }
   }
   
