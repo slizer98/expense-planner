@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { categories } from "../data/categories";
 import DatePicker from "react-date-picker";
 import 'react-calendar/dist/Calendar.css'
@@ -17,7 +17,15 @@ export default function ExpenseForm() {
   })
 
   const [error, setError] = useState('')
-  const { dispatch } = useBudget()
+  const { dispatch, state } = useBudget()
+
+  useEffect(() => {
+    if(state.editingId) {
+      const editingExpense = state.expenses.filter(currentExpense => currentExpense.id === state.editingId)[0]
+      setExpense(editingExpense)
+    }
+  }, [state.editingId, state.expenses])
+  
 
   const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
     const {name, value} = e.target
@@ -42,7 +50,14 @@ export default function ExpenseForm() {
       }, 3000);
       return
     }
-    dispatch({type: 'add-expense', payload: { expense }})
+
+    if(state.editingId) {
+      dispatch({type: 'update-expense', payload: { expense: {id: state.editingId, ...expense} }})
+    } else {
+
+      dispatch({type: 'add-expense', payload: { expense }})
+    }
+    
     setExpense({
       amount: 0,
       expenseName: '',
@@ -50,10 +65,16 @@ export default function ExpenseForm() {
       date: new Date()
     })
   }
+
+  const isEditing = useMemo( ()=> state.editingId , [state.editingId])
   
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
-      <legend className="uppercase text-center text-2xl font-black border-b-4 border-green-600 py-2">Nuevo Gasto</legend>
+      <legend 
+        className="uppercase text-center text-2xl font-black border-b-4 border-green-600 py-2"
+      >
+        {isEditing ? 'Editar Gasto' : 'Nuevo Gasto'}
+      </legend>
       {error && <ErrorMessage>{error}</ErrorMessage>}
       <div className="flex flex-col gap-2">
         <label 
@@ -132,7 +153,7 @@ export default function ExpenseForm() {
       <input 
         type="submit" 
         className="bg-green-600 cursor-pointer w-full p-2 text-white uppercase font-bold rounded-lg" 
-        value="Registrar Gasto"
+        value={isEditing ? 'Actualizar Gasto' : 'Registrar Gasto'}
       />
       
     </form>
